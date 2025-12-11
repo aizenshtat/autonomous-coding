@@ -22,6 +22,25 @@ from dotenv import load_dotenv
 
 from agent import run_autonomous_agent
 
+
+class TeeOutput:
+    """Write to both terminal and file simultaneously."""
+    def __init__(self, terminal, file):
+        self.terminal = terminal
+        self.file = file
+
+    def write(self, message):
+        self.terminal.write(message)
+        self.file.write(message)
+        self.flush()
+
+    def flush(self):
+        self.terminal.flush()
+        self.file.flush()
+
+    def isatty(self):
+        return self.terminal.isatty()
+
 # Load environment variables from .env file
 load_dotenv()
 
@@ -132,13 +151,13 @@ def main() -> None:
     # Create project directory for log file
     project_dir.mkdir(parents=True, exist_ok=True)
 
-    # Redirect stdout/stderr to log file if specified
+    # Redirect stdout/stderr to log file if specified (tee to both terminal and file)
     if args.log_file:
         log_path = project_dir / args.log_file
-        print(f"Redirecting output to: {log_path}")
+        print(f"Logging output to: {log_path}")
         log_file = open(log_path, "w", buffering=1)  # Line buffered
-        sys.stdout = log_file
-        sys.stderr = log_file
+        sys.stdout = TeeOutput(sys.stdout, log_file)
+        sys.stderr = TeeOutput(sys.stderr, log_file)
 
     # Run the agent
     try:
