@@ -7,7 +7,7 @@
     in real-time. As each feature is added to the dashboard, that feature will immediately display the agent's progress
     in building it.
 
-    The dashboard reads from its OWN project directory (feature_list.json, screenshots/, claude-progress.txt, git log)
+    The dashboard reads from its OWN project directory (feature_list.json, screenshots/, live-output.txt, git log)
     and provides a clean, modern UI to visualize the agent's work in real-time.
   </overview>
 
@@ -70,8 +70,8 @@
     </screenshot_gallery>
 
     <activity_log>
-      - Read recent lines from ./claude-progress.txt
-      - Show last 20-30 lines of activity
+      - Read recent lines from ./live-output.txt (real-time agent output)
+      - Show last 30-50 lines of activity
       - Parse and format tool use: [Tool: Bash], [Tool: Edit], etc.
       - Color-code different activities:
         * Tool use in blue
@@ -155,15 +155,17 @@
 
     <logs>
       <endpoint>GET /api/logs</endpoint>
-      <description>Recent activity from claude-progress.txt</description>
+      <description>Recent activity from live-output.txt (real-time agent output)</description>
       <response>
         {
           "lines": [
-            "[10:45:32] [Tool: mcp__puppeteer__puppeteer_screenshot]",
-            "[10:45:28] Verified rename works ✓",
-            "[10:45:20] [Tool: Edit]"
+            "[Tool: mcp__puppeteer__puppeteer_screenshot]",
+            "   [Done]",
+            "[Tool: Edit]",
+            "   Input: {'file_path': '...'}",
+            "   [Done]"
           ],
-          "fullLogPath": "./claude-progress.txt"
+          "fullLogPath": "./live-output.txt"
         }
       </response>
     </logs>
@@ -362,11 +364,11 @@
       <title>Build Activity Log</title>
       <tasks>
         - Create /api/logs endpoint
-        - Read last 30 lines from claude-progress.txt
-        - Parse and format log lines
+        - Read last 30-50 lines from live-output.txt
+        - Parse and format log lines (handle [Tool: ...], [Done], [Error], etc.)
         - Implement color-coding for different types
         - Add auto-scroll to latest
-        - Test with current progress file
+        - Test with current output file
       </tasks>
       <test_criteria>
         - Log displays recent activity
@@ -380,7 +382,7 @@
       <title>Add Session Info</title>
       <tasks>
         - Create /api/session endpoint
-        - Parse session number from claude-progress.txt or git log
+        - Parse session number from live-output.txt or git log
         - Get latest git commit message and hash
         - Calculate elapsed time
         - Display stats (commits, files, etc.)
@@ -490,7 +492,7 @@
       FOR THE INITIAL BUILD ONLY: This project is SELF-MONITORING. The dashboard reads from its own project directory:
       - ./feature_list.json - The dashboard's own tests
       - ./screenshots/ - Screenshots of itself
-      - ./claude-progress.txt - Its own session notes
+      - ./live-output.txt - Real-time agent output (live activity feed)
       - ./.git/ - Its own git history
 
       As the agent adds features, those features immediately display the agent's progress in building them.

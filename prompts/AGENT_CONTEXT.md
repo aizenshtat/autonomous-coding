@@ -39,19 +39,49 @@ Multiple Sessions (3-second delay between each):
 ### Key Files You're Monitoring
 
 #### 1. `feature_list.json` - The Roadmap
-This file contains all test cases for the project. Each test has:
+This file contains all test cases for the project. Here's the exact format:
+
 ```json
 {
-  "category": "functional",  // or "style"
-  "description": "Brief description of feature",
-  "steps": ["Step 1: ...", "Step 2: ...", "Step 3: ..."],
-  "passes": false  // Changed to true when feature works
+  "tests": [
+    {
+      "category": "functional",
+      "description": "Basic server setup with Express",
+      "steps": [
+        "Step 1: Create Express server",
+        "Step 2: Configure port 4001",
+        "Step 3: Add health check endpoint"
+      ],
+      "passes": false
+    },
+    {
+      "category": "functional",
+      "description": "Progress API endpoint",
+      "steps": [
+        "Step 1: Read feature_list.json",
+        "Step 2: Count passing tests",
+        "Step 3: Return JSON with progress data"
+      ],
+      "passes": true
+    },
+    {
+      "category": "style",
+      "description": "Dark theme with Tailwind CSS",
+      "steps": [
+        "Step 1: Add Tailwind CDN",
+        "Step 2: Configure dark color palette",
+        "Step 3: Apply to all components"
+      ],
+      "passes": false
+    }
+  ]
 }
 ```
 
 **Your dashboard reads this to show progress!**
-- Count tests with `"passes": true`
-- Calculate percentage: (passing / total) * 100
+- Count tests with `"passes": true` (e.g., 1 passing in above example)
+- Total tests: `tests.length` (3 in above example)
+- Calculate percentage: `(passing / total) * 100` → `(1/3) * 100 = 33.3%`
 - In YOUR case, this is YOUR OWN feature_list.json
 
 #### 2. `screenshots/` - Visual Verification
@@ -63,19 +93,30 @@ The agent uses Puppeteer to take screenshots while testing features.
 **Your dashboard displays these in a gallery!**
 - In YOUR case, these are screenshots of YOURSELF being built
 
-#### 3. `claude-progress.txt` - Session Notes
-The agent writes detailed notes about each session:
-- What was implemented
+#### 3. `live-output.txt` - Real-Time Activity Feed
+The autonomous agent's live stdout/stderr output:
+- Real-time tool use: `[Tool: Bash]`, `[Tool: Edit]`, `[Tool: Read]`
+- Tool results: `[Done]`, `[Error]`
+- Agent thinking and decisions
+- Updates continuously as agent works
+
+**Your dashboard's Activity Log shows this file!**
+- Parse and format tool use lines
+- Color-code: tools (blue), success (green), errors (red)
+- In YOUR case, this shows YOU building yourself IN REAL-TIME
+
+#### 4. `claude-progress.txt` - Session Summaries
+Written after each session completes:
+- What was implemented in the session
 - Tests that now pass
 - Code changes made
 - Technical decisions
 
-**Your dashboard shows recent lines from this file!**
-- Parse and format tool use: `[Tool: Bash]`, `[Tool: Edit]`
-- Color-code: tools (blue), success (green), errors (red)
-- In YOUR case, this shows YOU building yourself
+**Your dashboard can show session summaries from this!**
+- Separate section for high-level progress notes
+- Session-by-session breakdown
 
-#### 4. Git History
+#### 5. Git History
 The agent commits frequently:
 - Each commit documents a feature completion
 - Commit messages describe what was built
@@ -112,7 +153,8 @@ The agent commits frequently:
 Your dashboard reads from **its own directory**:
 - `./feature_list.json` - YOUR test cases
 - `./screenshots/` - Screenshots of YOURSELF
-- `./claude-progress.txt` - YOUR session notes
+- `./live-output.txt` - YOUR real-time activity feed
+- `./claude-progress.txt` - YOUR session summaries
 - `./.git/` - YOUR git history
 
 ### Key Metrics to Display
@@ -131,8 +173,8 @@ Your dashboard reads from **its own directory**:
 - Endpoints:
   - `/api/progress` - Parse feature_list.json
   - `/api/screenshots` - List files from screenshots/
-  - `/api/logs` - Read claude-progress.txt
-  - `/api/session` - Parse session info
+  - `/api/logs` - Read live-output.txt (real-time activity)
+  - `/api/session` - Parse session info and claude-progress.txt summaries
   - `/api/stream` - SSE for real-time updates
 
 ### Frontend (Port 4000)
@@ -249,7 +291,7 @@ A: It won't exist in iteration 1. Handle gracefully - show "0/0 tests" or "Loadi
 A: Use Puppeteer to navigate to your own dashboard and verify it displays correctly.
 
 **Q: Is this really self-monitoring?**
-A: YES! You read `./feature_list.json` (your own tests), `./screenshots/` (pictures of yourself), and `./claude-progress.txt` (your own notes).
+A: YES! You read `./feature_list.json` (your own tests), `./screenshots/` (pictures of yourself), `./live-output.txt` (your live activity), and `./claude-progress.txt` (your session summaries).
 
 **Q: What's the meta moment?**
 A: When you take a screenshot of your dashboard showing its own progress building itself. Screenshot-ception! 📸🪞
