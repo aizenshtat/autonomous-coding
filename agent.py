@@ -98,6 +98,8 @@ async def run_autonomous_agent(
     project_dir: Path,
     model: str,
     max_iterations: Optional[int] = None,
+    spec_file: str = "app_spec.txt",
+    extra_files: list[str] = None,
 ) -> None:
     """
     Run the autonomous agent loop.
@@ -106,7 +108,11 @@ async def run_autonomous_agent(
         project_dir: Directory for the project
         model: Claude model to use
         max_iterations: Maximum number of iterations (None for unlimited)
+        spec_file: Name of spec file from prompts/ directory
+        extra_files: Additional files to copy from prompts/ directory
     """
+    if extra_files is None:
+        extra_files = []
     print("\n" + "=" * 70)
     print("  AUTONOMOUS CODING AGENT DEMO")
     print("=" * 70)
@@ -135,7 +141,7 @@ async def run_autonomous_agent(
         print("=" * 70)
         print()
         # Copy the app spec into the project directory for the agent to read
-        copy_spec_to_project(project_dir)
+        copy_spec_to_project(project_dir, spec_file, extra_files)
     else:
         print("Continuing existing project")
         print_progress_summary(project_dir)

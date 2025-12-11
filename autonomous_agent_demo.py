@@ -45,6 +45,11 @@ Examples:
   # Limit iterations for testing
   python autonomous_agent_demo.py --project-dir ./claude_clone --max-iterations 5
 
+  # Use custom spec with extra files
+  python autonomous_agent_demo.py --project-dir ./agent_dashboard \\
+    --spec monitoring_dashboard_spec.txt \\
+    --extra-files AGENT_CONTEXT.md
+
   # Continue existing project
   python autonomous_agent_demo.py --project-dir ./claude_clone
 
@@ -72,6 +77,21 @@ Environment Variables:
         type=str,
         default=DEFAULT_MODEL,
         help=f"Claude model to use (default: {DEFAULT_MODEL})",
+    )
+
+    parser.add_argument(
+        "--spec",
+        type=str,
+        default="app_spec.txt",
+        help="Spec file to use from prompts/ directory (default: app_spec.txt)",
+    )
+
+    parser.add_argument(
+        "--extra-files",
+        type=str,
+        nargs="*",
+        default=[],
+        help="Additional files to copy from prompts/ directory (e.g., AGENT_CONTEXT.md)",
     )
 
     return parser.parse_args()
@@ -107,6 +127,8 @@ def main() -> None:
                 project_dir=project_dir,
                 model=args.model,
                 max_iterations=args.max_iterations,
+                spec_file=args.spec,
+                extra_files=args.extra_files,
             )
         )
     except KeyboardInterrupt:
