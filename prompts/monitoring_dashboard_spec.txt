@@ -12,7 +12,7 @@
   </overview>
 
   <meta_experience>
-    This project is RECURSIVE:
+    FOR THIS PROJECT ONLY (building the dashboard itself), this is RECURSIVE:
     - The agent builds this monitoring dashboard
     - The dashboard monitors the agent building it
     - Screenshots show the dashboard building itself
@@ -20,6 +20,9 @@
     - You watch the agent watch itself build the watcher
 
     It's like painting a mirror while looking in the mirror you're painting! 🪞🎨
+
+    IMPORTANT: Once built, this dashboard will be used to monitor OTHER autonomous agent
+    projects (not itself). The self-monitoring/meta aspect is ONLY for the initial build.
   </meta_experience>
 
   <technology_stack>
@@ -484,7 +487,7 @@
 
   <special_notes>
     <recursive_nature>
-      This project is SELF-MONITORING. The dashboard reads from its own project directory:
+      FOR THE INITIAL BUILD ONLY: This project is SELF-MONITORING. The dashboard reads from its own project directory:
       - ./feature_list.json - The dashboard's own tests
       - ./screenshots/ - Screenshots of itself
       - ./claude-progress.txt - Its own session notes
@@ -492,6 +495,10 @@
 
       As the agent adds features, those features immediately display the agent's progress in building them.
       This creates a beautifully meta experience where you watch the agent watch itself build the watcher!
+
+      FUTURE USE: Once complete, this dashboard will be used as a general-purpose monitoring tool
+      for OTHER autonomous agent projects. It will read from the target project's directory instead
+      of its own. The self-monitoring aspect is special to this one build.
     </recursive_nature>
 
     <go_live_early>
