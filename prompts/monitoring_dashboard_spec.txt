@@ -1,0 +1,516 @@
+<project_specification>
+  <project_name>Autonomous Agent Self-Monitoring Dashboard</project_name>
+
+  <overview>
+    Build a real-time monitoring dashboard that displays the autonomous coding agent's progress AS IT BUILDS ITSELF.
+    This is a beautifully meta/recursive project: the agent will create a dashboard that monitors its own construction
+    in real-time. As each feature is added to the dashboard, that feature will immediately display the agent's progress
+    in building it.
+
+    The dashboard reads from its OWN project directory (feature_list.json, screenshots/, claude-progress.txt, git log)
+    and provides a clean, modern UI to visualize the agent's work in real-time.
+  </overview>
+
+  <meta_experience>
+    This project is RECURSIVE:
+    - The agent builds this monitoring dashboard
+    - The dashboard monitors the agent building it
+    - Screenshots show the dashboard building itself
+    - Logs show "Building activity log feature..."
+    - You watch the agent watch itself build the watcher
+
+    It's like painting a mirror while looking in the mirror you're painting! 🪞🎨
+  </meta_experience>
+
+  <technology_stack>
+    <frontend>
+      <framework>Pure HTML + Vanilla JavaScript (no build step)</framework>
+      <styling>Tailwind CSS via CDN</styling>
+      <updates>Server-Sent Events (SSE) for real-time updates every 2-3 seconds</updates>
+      <port>Serve static files from Express on port 4000</port>
+    </frontend>
+    <backend>
+      <runtime>Node.js with Express</runtime>
+      <role>Read-only API that monitors the current project directory</role>
+      <api>RESTful endpoints for progress, screenshots, logs, files</api>
+      <streaming>SSE endpoint for live updates</streaming>
+      <port>4001 (API server)</port>
+    </backend>
+    <monitoring>
+      <data_source>Current project directory (self-monitoring)</data_source>
+      <features>Progress tracking, screenshot gallery, activity log, session info</features>
+      <update_frequency>Every 2-3 seconds via SSE</update_frequency>
+    </monitoring>
+  </technology_stack>
+
+  <core_features>
+    <progress_display>
+      - Read ./feature_list.json from current directory
+      - Count tests with "passes": true
+      - Calculate percentage (passing / total * 100)
+      - Display with animated progress bar
+      - Show current session number
+      - Display model being used (from AGENT_CONTEXT.md or detect)
+      - Auto-update every 2-3 seconds
+      - Highlight recent changes (new passing tests)
+    </progress_display>
+
+    <screenshot_gallery>
+      - List all files from ./screenshots/ directory
+      - Display newest 8-12 screenshots in grid layout
+      - Show thumbnails (100x100px) with click to enlarge
+      - Display filename and timestamp
+      - Auto-update when new screenshots appear
+      - Smooth fade-in animation for new screenshots
+      - "View All" button to see complete gallery
+      - Lightbox modal for full-size viewing
+    </screenshot_gallery>
+
+    <activity_log>
+      - Read recent lines from ./claude-progress.txt
+      - Show last 20-30 lines of activity
+      - Parse and format tool use: [Tool: Bash], [Tool: Edit], etc.
+      - Color-code different activities:
+        * Tool use in blue
+        * Success markers (✓, Done) in green
+        * Errors in red
+        * Regular text in gray
+      - Auto-scroll to latest activity
+      - Show timestamps if available
+      - Update in real-time as file grows
+      - "View Full Log" button to see complete history
+    </activity_log>
+
+    <session_info>
+      - Current session number (parse from claude-progress.txt)
+      - Model being used (default: claude-opus-4-5)
+      - Project start time and elapsed duration
+      - Latest git commit message and hash
+      - Total commits count
+      - Files created/modified count
+      - Lines of code written (optional)
+      - Last update timestamp ("Updated 3 seconds ago")
+    </session_info>
+
+    <file_browser>
+      - List generated files in project directory
+      - Show file tree structure
+      - Highlight recently modified files (< 5 minutes)
+      - Display file sizes
+      - Group by directory (server/, public/, etc.)
+      - Click to copy file path
+      - Show file count by type (.js, .html, .json)
+    </file_browser>
+
+    <git_history>
+      - Display last 5-10 git commits
+      - Show commit hash (short), message, timestamp
+      - Parse commit messages for feature completion
+      - Link to view diff (optional)
+      - Show branch name
+      - Display total commit count
+    </git_history>
+
+    <auto_refresh>
+      - SSE connection for live updates
+      - Update all metrics every 2-3 seconds
+      - Visual indicator showing "Connected" status
+      - Green dot when receiving updates
+      - Auto-reconnect if connection drops
+      - Toggle to pause/resume updates
+      - Show last update timestamp
+    </auto_refresh>
+  </core_features>
+
+  <api_endpoints>
+    <progress>
+      <endpoint>GET /api/progress</endpoint>
+      <description>Current test progress from feature_list.json</description>
+      <response>
+        {
+          "passing": 7,
+          "total": 186,
+          "percentage": 3.8,
+          "recentTests": ["Test #7: Activity log", "Test #6: Screenshot gallery"]
+        }
+      </response>
+    </progress>
+
+    <screenshots>
+      <endpoint>GET /api/screenshots</endpoint>
+      <description>List of screenshot files with metadata</description>
+      <response>
+        {
+          "screenshots": [
+            {"filename": "test_01.png", "size": 45231, "timestamp": 1702345678},
+            {"filename": "test_02.png", "size": 52144, "timestamp": 1702345890}
+          ],
+          "count": 2
+        }
+      </response>
+    </screenshots>
+
+    <logs>
+      <endpoint>GET /api/logs</endpoint>
+      <description>Recent activity from claude-progress.txt</description>
+      <response>
+        {
+          "lines": [
+            "[10:45:32] [Tool: mcp__puppeteer__puppeteer_screenshot]",
+            "[10:45:28] Verified rename works ✓",
+            "[10:45:20] [Tool: Edit]"
+          ],
+          "fullLogPath": "./claude-progress.txt"
+        }
+      </response>
+    </logs>
+
+    <session_info>
+      <endpoint>GET /api/session</endpoint>
+      <description>Current session information</description>
+      <response>
+        {
+          "session": 7,
+          "model": "claude-opus-4-5",
+          "startTime": 1702345000,
+          "elapsed": "45 minutes",
+          "latestCommit": {
+            "hash": "abc123f",
+            "message": "Implement conversation rename",
+            "timestamp": 1702345600
+          },
+          "stats": {
+            "totalCommits": 12,
+            "filesCreated": 45,
+            "linesOfCode": 2340
+          }
+        }
+      </response>
+    </session_info>
+
+    <files>
+      <endpoint>GET /api/files</endpoint>
+      <description>List of generated files</description>
+      <response>
+        {
+          "files": [
+            {"path": "server/index.js", "size": 3421, "modified": 1702345678},
+            {"path": "public/index.html", "size": 5231, "modified": 1702345890}
+          ],
+          "tree": {...}
+        }
+      </response>
+    </files>
+
+    <stream>
+      <endpoint>GET /api/stream</endpoint>
+      <description>Server-Sent Events endpoint for real-time updates</description>
+      <events>
+        event: progress
+        data: {"passing": 8, "total": 186}
+
+        event: screenshot
+        data: {"filename": "new_test.png"}
+
+        event: log
+        data: {"line": "[10:50:15] Test #8 completed ✓"}
+      </events>
+    </stream>
+  </api_endpoints>
+
+  <ui_layout>
+    <header>
+      - App title: "🤖 Autonomous Agent Monitor"
+      - Auto-refresh indicator with ON/OFF toggle
+      - Connection status (green dot when connected)
+      - Last update timestamp
+    </header>
+
+    <main_section>
+      - Large session info card at top
+        * Session number, model, status (Running/Complete)
+        * Progress bar with percentage
+        * Latest commit message
+        * Last update time
+
+      - Two-column layout below:
+        Left column:
+          * Screenshot Gallery (grid of thumbnails)
+          * "View All" button
+
+        Right column:
+          * Recent Activity log (scrollable)
+          * "View Full Log" button
+
+      - Optional bottom section:
+        * File Browser (collapsible)
+        * Git History (last 5 commits)
+    </main_section>
+
+    <responsive_design>
+      - Desktop: Two-column layout
+      - Tablet: Stacked sections
+      - Mobile: Single column, collapsible sections
+    </responsive_design>
+  </ui_layout>
+
+  <design_system>
+    <color_palette>
+      - Background: Dark gray (#1A1A1A)
+      - Surface: Darker gray (#2A2A2A)
+      - Text: Off-white (#E5E5E5)
+      - Accent: Blue (#3B82F6) for tools, Green (#10B981) for success, Red (#EF4444) for errors
+      - Border: Dark gray (#404040)
+    </color_palette>
+
+    <typography>
+      - Sans-serif system font (Inter, SF Pro, system-ui)
+      - Headers: font-semibold, larger size
+      - Body: font-normal, comfortable line-height
+      - Code: Monospace (JetBrains Mono, Consolas)
+    </typography>
+
+    <components>
+      <progress_bar>
+        - Animated fill on update
+        - Smooth transitions
+        - Show percentage inside bar
+        - Height: 24px, rounded corners
+      </progress_bar>
+
+      <screenshot_thumbnail>
+        - 100x100px squares in grid
+        - Border on hover
+        - Click to enlarge (modal/lightbox)
+        - Fade-in animation for new screenshots
+      </screenshot_thumbnail>
+
+      <activity_log_line>
+        - Monospace font
+        - Color-coded by type (tool/success/error)
+        - Timestamp on left
+        - Auto-scroll to bottom
+      </activity_log_line>
+
+      <session_card>
+        - Large card at top
+        - Prominent session number and status
+        - Progress bar prominent
+        - Grid layout for stats
+      </session_card>
+    </components>
+  </design_system>
+
+  <implementation_steps>
+    <step number="1">
+      <title>Setup Project Foundation</title>
+      <tasks>
+        - Create Express server (port 4001)
+        - Serve static files on port 4000
+        - Create basic HTML structure with Tailwind CSS
+        - Implement health check endpoint
+        - Test server starts and serves HTML
+      </tasks>
+      <test_criteria>
+        - Server starts without errors
+        - http://localhost:4000 loads basic HTML
+        - http://localhost:4001/health returns 200 OK
+      </test_criteria>
+    </step>
+
+    <step number="2">
+      <title>Implement Progress Display</title>
+      <tasks>
+        - Create /api/progress endpoint
+        - Read feature_list.json from current directory
+        - Count passing tests
+        - Calculate percentage
+        - Build progress card UI component
+        - Add animated progress bar
+        - Test with current project's feature_list.json
+      </tasks>
+      <test_criteria>
+        - Progress shows correct count (X/Y tests)
+        - Percentage calculates correctly
+        - Progress bar fills proportionally
+        - Updates when feature_list.json changes
+      </test_criteria>
+    </step>
+
+    <step number="3">
+      <title>Add Screenshot Gallery</title>
+      <tasks>
+        - Create /api/screenshots endpoint
+        - List files from ./screenshots/ directory
+        - Build thumbnail grid UI
+        - Implement click-to-enlarge modal
+        - Add fade-in animation for new screenshots
+        - Test with sample screenshot files
+      </tasks>
+      <test_criteria>
+        - Gallery displays all screenshots
+        - Thumbnails load and display correctly
+        - Click opens full-size image
+        - New screenshots appear automatically
+      </test_criteria>
+    </step>
+
+    <step number="4">
+      <title>Build Activity Log</title>
+      <tasks>
+        - Create /api/logs endpoint
+        - Read last 30 lines from claude-progress.txt
+        - Parse and format log lines
+        - Implement color-coding for different types
+        - Add auto-scroll to latest
+        - Test with current progress file
+      </tasks>
+      <test_criteria>
+        - Log displays recent activity
+        - Color-coding works (tools=blue, success=green, errors=red)
+        - Auto-scrolls to latest entry
+        - Updates in real-time
+      </test_criteria>
+    </step>
+
+    <step number="5">
+      <title>Add Session Info</title>
+      <tasks>
+        - Create /api/session endpoint
+        - Parse session number from claude-progress.txt or git log
+        - Get latest git commit message and hash
+        - Calculate elapsed time
+        - Display stats (commits, files, etc.)
+        - Build session info card UI
+      </tasks>
+      <test_criteria>
+        - Session number displays correctly
+        - Latest commit shows accurate info
+        - Stats update in real-time
+        - Elapsed time increments
+      </test_criteria>
+    </step>
+
+    <step number="6">
+      <title>Implement Real-Time Updates (SSE)</title>
+      <tasks>
+        - Create /api/stream SSE endpoint
+        - Emit events every 2-3 seconds
+        - Send progress, screenshot, and log updates
+        - Build SSE client in frontend
+        - Add connection status indicator
+        - Implement auto-reconnect logic
+      </tasks>
+      <test_criteria>
+        - SSE connection establishes successfully
+        - Updates arrive every 2-3 seconds
+        - Connection status shows green when connected
+        - Auto-reconnects if connection drops
+        - All UI elements update automatically
+      </test_criteria>
+    </step>
+
+    <step number="7">
+      <title>Add File Browser (Optional)</title>
+      <tasks>
+        - Create /api/files endpoint
+        - List files in project directory recursively
+        - Build file tree UI component
+        - Highlight recently modified files
+        - Add file count statistics
+      </tasks>
+      <test_criteria>
+        - File tree displays project structure
+        - Recently modified files highlighted
+        - File counts accurate
+        - Updates when new files created
+      </test_criteria>
+    </step>
+
+    <step number="8">
+      <title>Polish and Testing</title>
+      <tasks>
+        - Add responsive design for mobile/tablet
+        - Implement smooth animations and transitions
+        - Add error handling for missing files
+        - Test with browser automation (Puppeteer)
+        - Take screenshots of dashboard at each step
+        - Verify self-monitoring works (recursive!)
+      </tasks>
+      <test_criteria>
+        - Responsive on all screen sizes
+        - Animations smooth and professional
+        - Handles missing files gracefully
+        - Screenshots show dashboard building itself
+        - All features update in real-time
+      </test_criteria>
+    </step>
+  </implementation_steps>
+
+  <success_criteria>
+    <functionality>
+      - Dashboard goes live after iteration 1-2 (basic UI functional)
+      - Progress display works and updates in real-time
+      - Screenshot gallery shows images as they're created
+      - Activity log displays recent agent output
+      - Session info accurate and current
+      - SSE updates work reliably every 2-3 seconds
+    </functionality>
+
+    <meta_experience>
+      - Dashboard monitors its OWN directory (./feature_list.json, etc.)
+      - Screenshots show the dashboard building itself
+      - Activity log shows agent building the log feature
+      - Progress shows dashboard's own test completion
+      - The recursive/meta experience works beautifully
+    </meta_experience>
+
+    <user_experience>
+      - UI is clean and modern
+      - Updates are smooth and non-disruptive
+      - Information is easy to scan
+      - Connection status is clear
+      - Responsive on all devices
+    </user_experience>
+
+    <technical_quality>
+      - Read-only operations (never writes files)
+      - Efficient file monitoring
+      - Handles missing files gracefully
+      - SSE connection stable and reliable
+      - No memory leaks or performance issues
+    </technical_quality>
+  </success_criteria>
+
+  <special_notes>
+    <recursive_nature>
+      This project is SELF-MONITORING. The dashboard reads from its own project directory:
+      - ./feature_list.json - The dashboard's own tests
+      - ./screenshots/ - Screenshots of itself
+      - ./claude-progress.txt - Its own session notes
+      - ./.git/ - Its own git history
+
+      As the agent adds features, those features immediately display the agent's progress in building them.
+      This creates a beautifully meta experience where you watch the agent watch itself build the watcher!
+    </recursive_nature>
+
+    <go_live_early>
+      The dashboard should become functional EARLY (iteration 1-2):
+      - Iteration 1: Basic server + HTML → Dashboard goes live showing "1/10 tests passing"
+      - Iteration 2: Progress bar → Now shows progress bar with "3/10 tests passing"
+      - Iteration 3: Screenshot gallery → Gallery shows screenshots of itself!
+      - Iteration 4: Activity log → Log shows "Building activity log..."
+      - Iteration 5+: Polish and remaining features
+
+      This allows the user to watch each feature appear in real-time!
+    </go_live_early>
+
+    <testing_strategy>
+      - Use Puppeteer to test the dashboard
+      - Take screenshots of the dashboard at each step
+      - Verify the dashboard shows its own progress correctly
+      - Test that updates happen automatically
+      - Verify all features work with self-monitoring
+    </testing_strategy>
+  </special_notes>
+</project_specification>
