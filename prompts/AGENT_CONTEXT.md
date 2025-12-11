@@ -39,44 +39,8 @@ Multiple Sessions (3-second delay between each):
 ### Key Files You're Monitoring
 
 #### 1. `feature_list.json` - The Roadmap
-This file contains all test cases for the project. Here's the exact format:
+This file contains all test cases for the project. 
 
-```json
-{
-  "tests": [
-    {
-      "category": "functional",
-      "description": "Basic server setup with Express",
-      "steps": [
-        "Step 1: Create Express server",
-        "Step 2: Configure port 4001",
-        "Step 3: Add health check endpoint"
-      ],
-      "passes": false
-    },
-    {
-      "category": "functional",
-      "description": "Progress API endpoint",
-      "steps": [
-        "Step 1: Read feature_list.json",
-        "Step 2: Count passing tests",
-        "Step 3: Return JSON with progress data"
-      ],
-      "passes": true
-    },
-    {
-      "category": "style",
-      "description": "Dark theme with Tailwind CSS",
-      "steps": [
-        "Step 1: Add Tailwind CDN",
-        "Step 2: Configure dark color palette",
-        "Step 3: Apply to all components"
-      ],
-      "passes": false
-    }
-  ]
-}
-```
 
 **Your dashboard reads this to show progress!**
 - Count tests with `"passes": true` (e.g., 1 passing in above example)

@@ -135,7 +135,7 @@ git commit -m "Implement [feature name] - verified end-to-end
 - Added [specific changes]
 - Tested with browser automation
 - Updated feature_list.json: marked test #X as passing
-- Screenshots in verification/ directory
+- Screenshots in screenshots/ directory
 "
 ```
 
