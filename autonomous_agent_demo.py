@@ -56,23 +56,29 @@ def parse_args() -> argparse.Namespace:
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  # Start fresh project
-  python autonomous_agent_demo.py --project-dir ./claude_clone
+  # Use monitoring dashboard spec (auto-creates generations/monitoring_dashboard/)
+  python autonomous_agent_demo.py \\
+    --spec monitoring_dashboard_spec.txt \\
+    --extra-files AGENT_CONTEXT.md
 
-  # Use a specific model
-  python autonomous_agent_demo.py --project-dir ./claude_clone --model claude-sonnet-4-5-20250929
+  # Use custom project name
+  python autonomous_agent_demo.py \\
+    --spec monitoring_dashboard_spec.txt \\
+    --project-name my_dashboard \\
+    --extra-files AGENT_CONTEXT.md
+
+  # Use explicit project directory
+  python autonomous_agent_demo.py --project-dir ./claude_clone
 
   # Limit iterations for testing
-  python autonomous_agent_demo.py --project-dir ./claude_clone --max-iterations 5
-
-  # Use custom spec with extra files and log to file
-  python autonomous_agent_demo.py --project-dir ./agent_dashboard \\
+  python autonomous_agent_demo.py \\
     --spec monitoring_dashboard_spec.txt \\
-    --extra-files AGENT_CONTEXT.md \\
-    --log-file live-output.txt
+    --max-iterations 5
 
-  # Continue existing project
-  python autonomous_agent_demo.py --project-dir ./claude_clone
+  # Use a specific model
+  python autonomous_agent_demo.py \\
+    --spec monitoring_dashboard_spec.txt \\
+    --model claude-sonnet-4-5-20250929
 
 Environment Variables:
   CLAUDE_OAUTH_TOKEN    Your Claude OAuth token (required)
@@ -82,8 +88,15 @@ Environment Variables:
     parser.add_argument(
         "--project-dir",
         type=Path,
-        default=Path("./autonomous_demo_project"),
-        help="Directory for the project (default: generations/autonomous_demo_project). Relative paths automatically placed in generations/ directory.",
+        default=None,
+        help="Directory for the project. If not specified, derives from --spec name. Relative paths automatically placed in generations/ directory.",
+    )
+
+    parser.add_argument(
+        "--project-name",
+        type=str,
+        default=None,
+        help="Project name (default: derived from spec file name, e.g., monitoring_dashboard_spec.txt -> monitoring_dashboard)",
     )
 
     parser.add_argument(
@@ -137,8 +150,19 @@ def main() -> None:
         print("  export CLAUDE_OAUTH_TOKEN='your-token-here'")
         return
 
+    # Determine project directory
+    if args.project_dir:
+        # User specified project directory explicitly
+        project_dir = args.project_dir
+    elif args.project_name:
+        # User specified project name
+        project_dir = Path(args.project_name)
+    else:
+        # Derive from spec file name (remove _spec suffix)
+        spec_name = args.spec.replace(".txt", "").replace("_spec", "")
+        project_dir = Path(spec_name)
+
     # Automatically place projects in generations/ directory unless already specified
-    project_dir = args.project_dir
     if not str(project_dir).startswith("generations/"):
         # Convert relative paths to be under generations/
         if project_dir.is_absolute():
