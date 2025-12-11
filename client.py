@@ -54,11 +54,11 @@ def create_client(project_dir: Path, model: str) -> ClaudeSDKClient:
     3. Security hooks - Bash commands validated against an allowlist
        (see security.py for ALLOWED_COMMANDS)
     """
-    api_key = os.environ.get("ANTHROPIC_API_KEY")
+    api_key = os.environ.get("CLAUDE_OAUTH_TOKEN")
     if not api_key:
         raise ValueError(
-            "ANTHROPIC_API_KEY environment variable not set.\n"
-            "Get your API key from: https://console.anthropic.com/"
+            "CLAUDE_OAUTH_TOKEN environment variable not set.\n"
+            "Get your token using: claude setup-token"
         )
 
     # Create comprehensive security settings
@@ -108,7 +108,13 @@ def create_client(project_dir: Path, model: str) -> ClaudeSDKClient:
                 *PUPPETEER_TOOLS,
             ],
             mcp_servers={
-                "puppeteer": {"command": "npx", "args": ["puppeteer-mcp-server"]}
+                "puppeteer": {
+                    "command": "npx",
+                    "args": ["puppeteer-mcp-server"],
+                    "env": {
+                        "PUPPETEER_SCREENSHOT_DIR": str(project_dir.resolve() / "screenshots")
+                    }
+                }
             },
             hooks={
                 "PreToolUse": [

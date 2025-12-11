@@ -17,11 +17,16 @@ import asyncio
 import os
 from pathlib import Path
 
+from dotenv import load_dotenv
+
 from agent import run_autonomous_agent
+
+# Load environment variables from .env file
+load_dotenv()
 
 
 # Configuration
-DEFAULT_MODEL = "claude-sonnet-4-5-20250929"
+DEFAULT_MODEL = "claude-opus-4-5"
 
 
 def parse_args() -> argparse.Namespace:
@@ -44,7 +49,7 @@ Examples:
   python autonomous_agent_demo.py --project-dir ./claude_clone
 
 Environment Variables:
-  ANTHROPIC_API_KEY    Your Anthropic API key (required)
+  CLAUDE_OAUTH_TOKEN    Your Claude OAuth token (required)
         """,
     )
 
@@ -76,12 +81,12 @@ def main() -> None:
     """Main entry point."""
     args = parse_args()
 
-    # Check for API key
-    if not os.environ.get("ANTHROPIC_API_KEY"):
-        print("Error: ANTHROPIC_API_KEY environment variable not set")
-        print("\nGet your API key from: https://console.anthropic.com/")
+    # Check for OAuth token
+    if not os.environ.get("CLAUDE_OAUTH_TOKEN"):
+        print("Error: CLAUDE_OAUTH_TOKEN environment variable not set")
+        print("\nSet up your token using: claude setup-token")
         print("\nThen set it:")
-        print("  export ANTHROPIC_API_KEY='your-api-key-here'")
+        print("  export CLAUDE_OAUTH_TOKEN='your-token-here'")
         return
 
     # Automatically place projects in generations/ directory unless already specified

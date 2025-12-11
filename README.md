@@ -1,64 +1,171 @@
-# Claude Quickstarts
+# Autonomous Coding Agent Demo
 
-Claude Quickstarts is a collection of projects designed to help developers quickly get started with building  applications using the Claude API. Each quickstart provides a foundation that you can easily build upon and customize for your specific needs.
+A minimal harness demonstrating long-running autonomous coding with the Claude Agent SDK. This demo implements a two-agent pattern (initializer + coding agent) that can build complete applications over multiple sessions.
 
-## Getting Started
+## Prerequisites
 
-To use these quickstarts, you'll need an Claude API key. If you don't have one yet, you can sign up for free at [console.anthropic.com](https://console.anthropic.com).
+**Required:** Install the latest versions of both Claude Code and the Claude Agent SDK:
 
-## Available Quickstarts
+```bash
+# Install Claude Code CLI (latest version required)
+npm install -g @anthropic-ai/claude-code
 
-### Customer Support Agent
+# Install Python dependencies
+pip install -r requirements.txt
+```
 
-A customer support agent powered by Claude. This project demonstrates how to leverage Claude's natural language understanding and generation capabilities to create an AI-assisted customer support system with access to a knowledge base.
+Verify your installations:
+```bash
+claude --version  # Should be latest version
+pip show claude-code-sdk  # Check SDK is installed
+```
 
-[Go to Customer Support Agent Quickstart](./customer-support-agent)
+**Authentication:** Set up your Claude OAuth token:
+```bash
+# First, set up your token (requires Claude subscription)
+claude setup-token
 
-### Financial Data Analyst
+# Option 1: Use .env file (recommended)
+cp .env.example .env
+# Then edit .env and add your token
 
-A financial data analyst powered by Claude. This project demonstrates how to leverage Claude's capabilities with interactive data visualization to analyze financial data via chat.
+# Option 2: Export as environment variable
+export CLAUDE_OAUTH_TOKEN='your-token-here'
+```
 
-[Go to Financial Data Analyst Quickstart](./financial-data-analyst)
+## Quick Start
 
-### Computer Use Demo
+```bash
+python autonomous_agent_demo.py --project-dir ./my_project
+```
 
-An environment and tools that Claude can use to control a desktop computer. This project demonstrates how to leverage the computer use capabilities of Claude, including support for the latest `computer_use_20251124` tool version with zoom actions.
+For testing with limited iterations:
+```bash
+python autonomous_agent_demo.py --project-dir ./my_project --max-iterations 3
+```
 
-[Go to Computer Use Demo Quickstart](./computer-use-demo)
+## Important Timing Expectations
 
-### Autonomous Coding Agent
+> **Warning: This demo takes a long time to run!**
 
-An autonomous coding agent powered by the Claude Agent SDK. This project demonstrates a two-agent pattern (initializer + coding agent) that can build complete applications over multiple sessions, with progress persisted via git and a feature list that the agent works through incrementally.
+- **First session (initialization):** The agent generates a `feature_list.json` with 200 test cases. This takes several minutes and may appear to hang - this is normal. The agent is writing out all the features.
 
-[Go to Autonomous Coding Agent Quickstart](./autonomous-coding)
+- **Subsequent sessions:** Each coding iteration can take **5-15 minutes** depending on complexity.
 
-## General Usage
+- **Full app:** Building all 200 features typically requires **many hours** of total runtime across multiple sessions.
 
-Each quickstart project comes with its own README and setup instructions. Generally, you'll follow these steps:
+**Tip:** The 200 features parameter in the prompts is designed for comprehensive coverage. If you want faster demos, you can modify `prompts/initializer_prompt.md` to reduce the feature count (e.g., 20-50 features for a quicker demo).
 
-1. Clone this repository
-2. Navigate to the specific quickstart directory
-3. Install the required dependencies
-4. Set up your Claude API key as an environment variable
-5. Run the quickstart application
+## How It Works
 
-## Explore Further
+### Two-Agent Pattern
 
-To deepen your understanding of working with Claude and the Claude API, check out these resources:
+1. **Initializer Agent (Session 1):** Reads `app_spec.txt`, creates `feature_list.json` with 200 test cases, sets up project structure, and initializes git.
 
-- [Claude API Documentation](https://docs.claude.com)
-- [Claude Cookbooks](https://github.com/anthropics/claude-cookbooks) - A collection of code snippets and guides for common tasks
-- [Claude API Fundamentals Course](https://github.com/anthropics/courses/tree/master/anthropic_api_fundamentals)
+2. **Coding Agent (Sessions 2+):** Picks up where the previous session left off, implements features one by one, and marks them as passing in `feature_list.json`.
 
-## Contributing
+### Session Management
 
-We welcome contributions to the Claude Quickstarts repository! If you have ideas for new quickstart projects or improvements to existing ones, please open an issue or submit a pull request.
+- Each session runs with a fresh context window
+- Progress is persisted via `feature_list.json` and git commits
+- The agent auto-continues between sessions (3 second delay)
+- Press `Ctrl+C` to pause; run the same command to resume
 
-## Community and Support
+## Security Model
 
-- Join our [Anthropic Discord community](https://www.anthropic.com/discord) for discussions and support
-- Check out the [Anthropic support documentation](https://support.anthropic.com) for additional help
+This demo uses a defense-in-depth security approach (see `security.py` and `client.py`):
+
+1. **OS-level Sandbox:** Bash commands run in an isolated environment
+2. **Filesystem Restrictions:** File operations restricted to the project directory only
+3. **Bash Allowlist:** Only specific commands are permitted:
+   - File inspection: `ls`, `cat`, `head`, `tail`, `wc`, `grep`
+   - Node.js: `npm`, `node`
+   - Version control: `git`
+   - Process management: `ps`, `lsof`, `sleep`, `pkill` (dev processes only)
+
+Commands not in the allowlist are blocked by the security hook.
+
+## Project Structure
+
+```
+autonomous-coding/
+├── autonomous_agent_demo.py  # Main entry point
+├── agent.py                  # Agent session logic
+├── client.py                 # Claude SDK client configuration
+├── security.py               # Bash command allowlist and validation
+├── progress.py               # Progress tracking utilities
+├── prompts.py                # Prompt loading utilities
+├── prompts/
+│   ├── app_spec.txt          # Application specification
+│   ├── initializer_prompt.md # First session prompt
+│   └── coding_prompt.md      # Continuation session prompt
+└── requirements.txt          # Python dependencies
+```
+
+## Generated Project Structure
+
+After running, your project directory will contain:
+
+```
+my_project/
+├── feature_list.json         # Test cases (source of truth)
+├── app_spec.txt              # Copied specification
+├── init.sh                   # Environment setup script
+├── claude-progress.txt       # Session progress notes
+├── .claude_settings.json     # Security settings
+└── [application files]       # Generated application code
+```
+
+## Running the Generated Application
+
+After the agent completes (or pauses), you can run the generated application:
+
+```bash
+cd generations/my_project
+
+# Run the setup script created by the agent
+./init.sh
+
+# Or manually (typical for Node.js apps):
+npm install
+npm run dev
+```
+
+The application will typically be available at `http://localhost:3000` or similar (check the agent's output or `init.sh` for the exact URL).
+
+## Command Line Options
+
+| Option | Description | Default |
+|--------|-------------|---------|
+| `--project-dir` | Directory for the project | `./autonomous_demo_project` |
+| `--max-iterations` | Max agent iterations | Unlimited |
+| `--model` | Claude model to use | `claude-sonnet-4-5-20250929` |
+
+## Customization
+
+### Changing the Application
+
+Edit `prompts/app_spec.txt` to specify a different application to build.
+
+### Adjusting Feature Count
+
+Edit `prompts/initializer_prompt.md` and change the "200 features" requirement to a smaller number for faster demos.
+
+### Modifying Allowed Commands
+
+Edit `security.py` to add or remove commands from `ALLOWED_COMMANDS`.
+
+## Troubleshooting
+
+**"Appears to hang on first run"**
+This is normal. The initializer agent is generating 200 detailed test cases, which takes significant time. Watch for `[Tool: ...]` output to confirm the agent is working.
+
+**"Command blocked by security hook"**
+The agent tried to run a command not in the allowlist. This is the security system working as intended. If needed, add the command to `ALLOWED_COMMANDS` in `security.py`.
+
+**"OAuth token not set"**
+Ensure `CLAUDE_OAUTH_TOKEN` is exported in your shell environment. Run `claude setup-token` first if you haven't already.
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+Internal Anthropic use.
