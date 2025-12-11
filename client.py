@@ -82,6 +82,15 @@ def create_client(project_dir: Path, model: str) -> ClaudeSDKClient:
                 *PUPPETEER_TOOLS,
             ],
         },
+        "mcpServers": {
+            "puppeteer": {
+                "command": "npx",
+                "args": ["puppeteer-mcp-server"],
+                "env": {
+                    "PUPPETEER_SCREENSHOT_DIR": str(project_dir.resolve() / "screenshots")
+                }
+            }
+        },
     }
 
     # Ensure project directory exists before creating settings file
