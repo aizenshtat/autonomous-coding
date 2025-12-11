@@ -15,6 +15,7 @@ Example Usage:
 import argparse
 import asyncio
 import os
+import sys
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -45,10 +46,11 @@ Examples:
   # Limit iterations for testing
   python autonomous_agent_demo.py --project-dir ./claude_clone --max-iterations 5
 
-  # Use custom spec with extra files
+  # Use custom spec with extra files and log to file
   python autonomous_agent_demo.py --project-dir ./agent_dashboard \\
     --spec monitoring_dashboard_spec.txt \\
-    --extra-files AGENT_CONTEXT.md
+    --extra-files AGENT_CONTEXT.md \\
+    --log-file live-output.txt
 
   # Continue existing project
   python autonomous_agent_demo.py --project-dir ./claude_clone
@@ -94,6 +96,13 @@ Environment Variables:
         help="Additional files to copy from prompts/ directory (e.g., AGENT_CONTEXT.md)",
     )
 
+    parser.add_argument(
+        "--log-file",
+        type=str,
+        default="live-output.txt",
+        help="Log file name in project directory for real-time output (default: live-output.txt)",
+    )
+
     return parser.parse_args()
 
 
@@ -119,6 +128,17 @@ def main() -> None:
         else:
             # Prepend generations/ to relative paths
             project_dir = Path("generations") / project_dir
+
+    # Create project directory for log file
+    project_dir.mkdir(parents=True, exist_ok=True)
+
+    # Redirect stdout/stderr to log file if specified
+    if args.log_file:
+        log_path = project_dir / args.log_file
+        print(f"Redirecting output to: {log_path}")
+        log_file = open(log_path, "w", buffering=1)  # Line buffered
+        sys.stdout = log_file
+        sys.stderr = log_file
 
     # Run the agent
     try:
